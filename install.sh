@@ -126,3 +126,7 @@ tar -C $INSTALL_DIRECTORY -zxf $DOWNLOAD_FILE turso
 rm -f $DOWNLOAD_FILE
 
 update_profile
+
+printf "\nTurso CLI installed!\n\n"
+printf "If you are a new user, you can sign up with ${bright_blue}turso auth signup${reset}.\n\n"
+printf "If you already have an account, please login with ${bright_blue}turso auth login${reset}.\n\n"
