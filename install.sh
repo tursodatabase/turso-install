@@ -106,12 +106,16 @@ detect_profile() {
 
 update_profile() {
    PROFILE_FILE=$(detect_profile)
-   if ! grep -q "\.turso" $PROFILE_FILE; then
-      printf "\n${bright_blue}Updating profile ${reset}$PROFILE_FILE\n"
-      printf "\n# Turso\nexport PATH=\"$INSTALL_DIRECTORY:\$PATH\"\n" >> $PROFILE_FILE
-      printf "\nTurso will be available when you open a new terminal.\n"
-      printf "If you want to make Turso available in this terminal, please run:\n"
-      printf "\nsource $PROFILE_FILE\n"
+   if [ ! -z "$DETECTED_PROFILE" ]; then
+     if ! grep -q "\.turso" $PROFILE_FILE; then
+        printf "\n${bright_blue}Updating profile ${reset}$PROFILE_FILE\n"
+        printf "\n# Turso\nexport PATH=\"$INSTALL_DIRECTORY:\$PATH\"\n" >> $PROFILE_FILE
+        printf "\nTurso will be available when you open a new terminal.\n"
+        printf "If you want to make Turso available in this terminal, please run:\n"
+        printf "\nsource $PROFILE_FILE\n"
+     fi
+   else
+     printf "\n${bright_blue}No profile file found, executable will not be in PATH${reset}\n"
    fi
 }
 
