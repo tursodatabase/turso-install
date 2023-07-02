@@ -119,8 +119,6 @@ print_logo
 probe_arch
 probe_os
 
-detect_profile
-
 URL_PREFIX="https://github.com/chiselstrike/homebrew-tap/releases/latest/download/"
 
 TARGET="${OS}_$ARCH"
