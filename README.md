@@ -3,5 +3,5 @@
 To install Turso, run:
 
 ```
-curl https://raw.githubusercontent.com/chiselstrike/turso-install/main/install.sh -sSfL | sh
+curl -sSfL https://get.tur.so/install.sh | bash
 ```
