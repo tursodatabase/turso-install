@@ -12,7 +12,8 @@ probe_arch() {
     ARCH=$(uname -m)
     case $ARCH in
         x86_64) ARCH="x86_64"  ;;
-        arm64)  ARCH="arm64" ;;
+        aarch64) ARCH="arm64" ;;
+        arm64) ARCH="arm64" ;;
         *) printf "Architecture ${ARCH} is not supported by this installation script\n"; exit 1 ;;
     esac
 }
