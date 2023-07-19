@@ -73,16 +73,14 @@ detect_profile() {
   local SHELLTYPE
   SHELLTYPE="$(basename "/$SHELL")"
 
-  if [ "$SHELLTYPE" = "bash" ]; then
+  if [ -n "$BASH" ]; then
     if [ -f "$HOME/.bashrc" ]; then
       DETECTED_PROFILE="$HOME/.bashrc"
     elif [ -f "$HOME/.bash_profile" ]; then
       DETECTED_PROFILE="$HOME/.bash_profile"
     fi
-  elif [ "$SHELLTYPE" = "zsh" ]; then
+  elif [ -n "$ZSH_NAME" ]; then
     DETECTED_PROFILE="$HOME/.zshrc"
-  elif [ "$SHELLTYPE" = "fish" ]; then
-    DETECTED_PROFILE="$HOME/.config/fish/conf.d/turso.fish"
   fi
 
   if [ -z "$DETECTED_PROFILE" ]; then
@@ -149,4 +147,4 @@ printf "\nTurso CLI installed!\n\n"
 printf "If you are a new user, you can sign up with ${bright_blue}turso auth signup${reset}.\n\n"
 printf "If you already have an account, please login with ${bright_blue}turso auth login${reset}.\n\n"
 
-turso auth signup
+$INSTALL_DIRECTORY/turso auth signup
