@@ -20,7 +20,7 @@ jobs:
 
       - name: Run Install Script
         run: |
-          export SKIP_SIGNUP=true
+          export TURSO_INSTALL_SKIP_SIGNUP=true
           bash install.sh
 
       - name: Verify installation

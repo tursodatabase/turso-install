@@ -155,7 +155,7 @@ printf "\nTurso CLI installed!\n\n"
 printf "If you are a new user, you can sign up with ${bright_blue}turso auth signup${reset}.\n\n"
 printf "If you already have an account, please login with ${bright_blue}turso auth login${reset}.\n\n"
 
-# if SKIP_SIGNUP is set, then skip the sign up command
-if [ -z "$SKIP_SIGNUP" ]; then
+# if TURSO_INSTALL_SKIP_SIGNUP is set, then skip the sign up command
+if [ -z "$TURSO_INSTALL_SKIP_SIGNUP" ]; then
   $INSTALL_DIRECTORY/turso auth signup
 fi
