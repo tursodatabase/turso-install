@@ -18,11 +18,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Minor hack to remove signup prompt
-        run: sed -i.bak '/\$INSTALL_DIRECTORY\/turso auth signup/d' install.sh && rm install.sh.bak
-
       - name: Run Install Script
-        run: bash install.sh
+        run: |
+          export TURSO_INSTALL_SKIP_SIGNUP=true
+          bash install.sh
 
       - name: Verify installation
         run: $HOME/.turso/turso --version
