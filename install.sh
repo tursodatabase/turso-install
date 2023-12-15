@@ -121,34 +121,30 @@ update_profile() {
    fi
 }
 
+install_turso_cli() {
+  URL_PREFIX="https://github.com/chiselstrike/homebrew-tap/releases/latest/download/"
+  TARGET="${OS}_$ARCH"
+
+  printf "${bright_blue}Downloading ${reset}$TARGET ...\n"
+
+  URL="$URL_PREFIX/homebrew-tap_$TARGET.tar.gz"
+  DOWNLOAD_FILE=$(mktemp -t turso.XXXXXXXXXX)
+
+  curl --progress-bar -L "$URL" -o "$DOWNLOAD_FILE"
+  printf "\n${bright_blue}Installing to ${reset}$INSTALL_DIRECTORY\n"
+  mkdir -p $INSTALL_DIRECTORY
+  tar -C $INSTALL_DIRECTORY -zxf $DOWNLOAD_FILE turso
+  rm -f $DOWNLOAD_FILE
+}
+
 printf "\nWelcome to the Turso installer!\n"
 
 print_logo
 probe_arch
 probe_os
 
-URL_PREFIX="https://github.com/chiselstrike/homebrew-tap/releases/latest/download/"
-
-TARGET="${OS}_$ARCH"
-
-printf "${bright_blue}Downloading ${reset}$TARGET ...\n"
-
-URL="$URL_PREFIX/homebrew-tap_$TARGET.tar.gz"
-
-DOWNLOAD_FILE=$(mktemp -t turso.XXXXXXXXXX)
-
-curl --progress-bar -L "$URL" -o "$DOWNLOAD_FILE"
-
 INSTALL_DIRECTORY="$HOME/.turso"
-
-printf "\n${bright_blue}Installing to ${reset}$INSTALL_DIRECTORY\n"
-
-mkdir -p $INSTALL_DIRECTORY
-
-tar -C $INSTALL_DIRECTORY -zxf $DOWNLOAD_FILE turso
-
-rm -f $DOWNLOAD_FILE
-
+install_turso_cli
 update_profile
 
 printf "\nTurso CLI installed!\n\n"
