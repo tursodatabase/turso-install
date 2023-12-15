@@ -23,5 +23,8 @@ jobs:
           export TURSO_INSTALL_SKIP_SIGNUP=true
           bash install.sh
 
-      - name: Verify installation
+      - name: Verify CLI installation
         run: $HOME/.turso/turso --version
+
+      - name: Verify LibSQL Server installation
+        run: $HOME/.turso/sqld --version
