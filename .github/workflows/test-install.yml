@@ -25,3 +25,6 @@ jobs:
 
       - name: Verify installation
         run: $HOME/.turso/turso --version
+
+      - name: Run quickstart
+        run: $HOME/.turso/turso quickstart
