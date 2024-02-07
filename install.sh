@@ -121,34 +121,63 @@ update_profile() {
    fi
 }
 
+install_turso_cli() {
+  URL_PREFIX="https://github.com/chiselstrike/homebrew-tap/releases/latest/download/"
+  TARGET="${OS}_$ARCH"
+
+  printf "${bright_blue}Downloading ${reset}$TARGET ...\n"
+
+  URL="$URL_PREFIX/homebrew-tap_$TARGET.tar.gz"
+  DOWNLOAD_FILE=$(mktemp -t turso.XXXXXXXXXX)
+
+  curl --progress-bar -L "$URL" -o "$DOWNLOAD_FILE"
+  printf "\n${bright_blue}Installing to ${reset}$INSTALL_DIRECTORY\n"
+  mkdir -p $INSTALL_DIRECTORY
+  tar -C $INSTALL_DIRECTORY -zxf $DOWNLOAD_FILE turso
+  rm -f $DOWNLOAD_FILE
+}
+
+install_libsql_server() {
+    case $ARCH in
+        x86_64) ARCH_TARGET="x86_64" ;;
+        aarch64) ARCH_TARGET="aarch64" ;;
+        *)
+            printf "Architecture ${ARCH} is not supported for libsql-server\n"
+            return 1
+            ;;
+    esac
+
+    case $OS in
+        Darwin) OS_TARGET="apple-darwin" ;;
+        Linux) OS_TARGET="unknown-linux-gnu" ;;
+        *)
+            printf "Operating system ${OS} is not supported for libsql-server\n"
+            return 1
+            ;;
+    esac
+
+    LIBSQL_TARGET="libsql-server-${ARCH_TARGET}-${OS_TARGET}"
+    LIBSQL_TAR="${LIBSQL_TARGET}.tar.xz"
+    LIBSQL_URL_PREFIX="https://github.com/tursodatabase/libsql/releases/latest/download"
+    LIBSQL_URL="${LIBSQL_URL_PREFIX}/${LIBSQL_TAR}"
+
+    LIBSQL_DOWNLOAD_FILE=$(mktemp -t turso-libsql.XXXXXXXXXX)
+    curl --progress-bar -L "$LIBSQL_URL" -o "$LIBSQL_DOWNLOAD_FILE"
+    printf "\n${bright_blue}Installing libsql-server to ${reset}$INSTALL_DIRECTORY\n"
+    mkdir -p $INSTALL_DIRECTORY
+    tar --strip-components=1 -C $INSTALL_DIRECTORY -xJf $LIBSQL_DOWNLOAD_FILE $LIBSQL_TARGET/sqld
+    rm -f $LIBSQL_DOWNLOAD_FILE
+}
+
 printf "\nWelcome to the Turso installer!\n"
 
 print_logo
 probe_arch
 probe_os
 
-URL_PREFIX="https://github.com/chiselstrike/homebrew-tap/releases/latest/download/"
-
-TARGET="${OS}_$ARCH"
-
-printf "${bright_blue}Downloading ${reset}$TARGET ...\n"
-
-URL="$URL_PREFIX/homebrew-tap_$TARGET.tar.gz"
-
-DOWNLOAD_FILE=$(mktemp -t turso.XXXXXXXXXX)
-
-curl --progress-bar -L "$URL" -o "$DOWNLOAD_FILE"
-
 INSTALL_DIRECTORY="$HOME/.turso"
-
-printf "\n${bright_blue}Installing to ${reset}$INSTALL_DIRECTORY\n"
-
-mkdir -p $INSTALL_DIRECTORY
-
-tar -C $INSTALL_DIRECTORY -zxf $DOWNLOAD_FILE turso
-
-rm -f $DOWNLOAD_FILE
-
+install_libsql_server
+install_turso_cli
 update_profile
 
 printf "\nTurso CLI installed!\n\n"
