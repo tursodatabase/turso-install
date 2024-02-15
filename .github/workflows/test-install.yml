@@ -12,11 +12,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, macos-14]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: OS and arch
+        run: |
+          echo "Runner label: ${{ matrix.os }}"
+          echo "OS: $(uname -s) Arch: $(uname -m)"
 
       - name: Run Install Script
         run: |
