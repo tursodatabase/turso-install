@@ -141,6 +141,7 @@ install_libsql_server() {
     case $ARCH in
         x86_64) ARCH_TARGET="x86_64" ;;
         aarch64) ARCH_TARGET="aarch64" ;;
+        arm64) ARCH_TARGET="aarch64" ;;
         *)
             printf "Architecture ${ARCH} is not supported for libsql-server\n"
             return 1
