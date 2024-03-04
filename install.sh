@@ -81,7 +81,7 @@ detect_profile() {
       DETECTED_PROFILE="$HOME/.bash_profile"
     fi
   elif [ "$SHELLTYPE" = "zsh" ]; then
-    DETECTED_PROFILE="$HOME/.zshrc"
+    DETECTED_PROFILE="${ZDOTDIR:-$HOME}/.zshrc"
   elif [ "$SHELLTYPE" = "fish" ]; then
     DETECTED_PROFILE="$HOME/.config/fish/conf.d/turso.fish"
   fi
@@ -93,8 +93,8 @@ detect_profile() {
       DETECTED_PROFILE="$HOME/.bashrc"
     elif [ -f "$HOME/.bash_profile" ]; then
       DETECTED_PROFILE="$HOME/.bash_profile"
-    elif [ -f "$HOME/.zshrc" ]; then
-      DETECTED_PROFILE="$HOME/.zshrc"
+    elif [ -f "${ZDOTDIR:-$HOME}/.zshrc" ]; then
+      DETECTED_PROFILE="${ZDOTDIR:-$HOME}/.zshrc"
     elif [ -d "$HOME/.config/fish" ]; then
       DETECTED_PROFILE="$HOME/.config/fish/conf.d/turso.fish"
     fi
