@@ -170,22 +170,27 @@ install_libsql_server() {
     rm -f $LIBSQL_DOWNLOAD_FILE
 }
 
-printf "\nWelcome to the Turso installer!\n"
+# do everything in main, so that partial downloads of this file don't mess up the installation
+main() {
+  printf "\nWelcome to the Turso installer!\n"
 
-print_logo
-probe_arch
-probe_os
+  print_logo
+  probe_arch
+  probe_os
 
-INSTALL_DIRECTORY="$HOME/.turso"
-install_libsql_server
-install_turso_cli
-update_profile
+  INSTALL_DIRECTORY="$HOME/.turso"
+  install_libsql_server
+  install_turso_cli
+  update_profile
 
-printf "\nTurso CLI installed!\n\n"
-printf "If you are a new user, you can sign up with ${bright_blue}turso auth signup${reset}.\n\n"
-printf "If you already have an account, please login with ${bright_blue}turso auth login${reset}.\n\n"
+  printf "\nTurso CLI installed!\n\n"
+  printf "If you are a new user, you can sign up with ${bright_blue}turso auth signup${reset}.\n\n"
+  printf "If you already have an account, please login with ${bright_blue}turso auth login${reset}.\n\n"
 
-# if TURSO_INSTALL_SKIP_SIGNUP is set, then skip the sign up command
-if [ -z "$TURSO_INSTALL_SKIP_SIGNUP" ]; then
-  $INSTALL_DIRECTORY/turso auth signup
-fi
+  # if TURSO_INSTALL_SKIP_SIGNUP is set, then skip the sign up command
+  if [ -z "$TURSO_INSTALL_SKIP_SIGNUP" ]; then
+    $INSTALL_DIRECTORY/turso auth signup
+  fi
+}
+
+main
