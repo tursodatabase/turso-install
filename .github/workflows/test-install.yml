@@ -11,12 +11,13 @@ jobs:
   install:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, macos-14]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: OS and arch
         run: |
@@ -33,3 +34,50 @@ jobs:
 
       - name: Verify LibSQL Server installation
         run: $HOME/.turso/sqld --version
+
+  install-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout installer
+        uses: actions/checkout@v4
+
+      - name: Checkout turso-cli
+        uses: actions/checkout@v4
+        with:
+          repository: tursodatabase/turso-cli
+          path: turso-cli
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: turso-cli/go.mod
+          cache: false
+
+      - name: Build native turso.exe and stage release zip
+        shell: pwsh
+        run: |
+          Push-Location turso-cli
+          go build -o turso.exe ./cmd/turso
+          Pop-Location
+          $stage = Join-Path $env:RUNNER_TEMP "turso-win-stage"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item turso-cli/turso.exe (Join-Path $stage "turso.exe")
+          $zip = Join-Path $env:RUNNER_TEMP "homebrew-tap_Windows_x86_64.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path (Join-Path $stage "turso.exe") -DestinationPath $zip -Force
+          "TURSO_INSTALL_ZIP=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Run PowerShell installer
+        shell: pwsh
+        run: |
+          $env:TURSO_INSTALL_DIR = Join-Path $env:USERPROFILE ".turso-ci-ps"
+          ./install.ps1
+          & "$env:TURSO_INSTALL_DIR\turso.exe" --help
+
+      - name: Run install.sh on Git Bash (native Windows)
+        shell: bash
+        run: |
+          export TURSO_INSTALL_ZIP="$TURSO_INSTALL_ZIP"
+          export TURSO_INSTALL_DIR="$USERPROFILE/.turso-ci-bash"
+          bash install.sh
+          "$TURSO_INSTALL_DIR/turso.exe" --help >/dev/null

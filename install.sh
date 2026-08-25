@@ -23,6 +23,9 @@ probe_os() {
     case $OS in
         Darwin) OS="Darwin" ;;
         Linux) OS="Linux" ;;
+        MINGW*|MSYS*|CYGWIN*|Windows_NT)
+            OS="Windows"
+            ;;
         *) printf "Operating system ${OS} is not supported by this installation script\n"; exit 1 ;;
     esac
 }
@@ -122,22 +125,60 @@ update_profile() {
 }
 
 install_turso_cli() {
-  URL_PREFIX="https://github.com/tursodatabase/homebrew-tap/releases/latest/download/"
+  URL_PREFIX="${TURSO_DOWNLOAD_BASE:-https://github.com/tursodatabase/homebrew-tap/releases/latest/download}"
+  URL_PREFIX="${URL_PREFIX%/}"
   TARGET="${OS}_$ARCH"
 
   printf "${bright_blue}Downloading ${reset}$TARGET ...\n"
+  mkdir -p "$INSTALL_DIRECTORY"
 
-  URL="$URL_PREFIX/homebrew-tap_$TARGET.tar.gz"
-  DOWNLOAD_FILE=$(mktemp -t turso.XXXXXXXXXX)
+  if [ -n "${TURSO_INSTALL_ZIP:-}" ]; then
+    DOWNLOAD_FILE="$TURSO_INSTALL_ZIP"
+    printf "${bright_blue}Using local archive ${reset}$DOWNLOAD_FILE\n"
+  elif [ "$OS" = "Windows" ]; then
+    URL="$URL_PREFIX/homebrew-tap_$TARGET.zip"
+    DOWNLOAD_FILE=$(mktemp -t turso.XXXXXXXXXX.zip)
+    curl --progress-bar -L "$URL" -o "$DOWNLOAD_FILE"
+  else
+    URL="$URL_PREFIX/homebrew-tap_$TARGET.tar.gz"
+    DOWNLOAD_FILE=$(mktemp -t turso.XXXXXXXXXX)
+    curl --progress-bar -L "$URL" -o "$DOWNLOAD_FILE"
+  fi
 
-  curl --progress-bar -L "$URL" -o "$DOWNLOAD_FILE"
   printf "\n${bright_blue}Installing to ${reset}$INSTALL_DIRECTORY\n"
-  mkdir -p $INSTALL_DIRECTORY
-  tar -C $INSTALL_DIRECTORY -zxf $DOWNLOAD_FILE turso
-  rm -f $DOWNLOAD_FILE
+  if [ "$OS" = "Windows" ]; then
+    EXTRACT_DIR=$(mktemp -d -t turso-extract.XXXXXXXXXX)
+    # Git Bash ships with unzip; fall back to tar which can read zip on modern builds.
+    if command -v unzip >/dev/null 2>&1; then
+      unzip -o -q "$DOWNLOAD_FILE" -d "$EXTRACT_DIR"
+    else
+      tar -C "$EXTRACT_DIR" -xf "$DOWNLOAD_FILE"
+    fi
+    EXE=$(find "$EXTRACT_DIR" -name 'turso.exe' | head -n 1)
+    if [ -z "$EXE" ]; then
+      printf "turso.exe was not found inside the release archive\n"
+      exit 1
+    fi
+    cp "$EXE" "$INSTALL_DIRECTORY/turso.exe"
+    rm -rf "$EXTRACT_DIR"
+    if [ -z "${TURSO_INSTALL_ZIP:-}" ]; then
+      rm -f "$DOWNLOAD_FILE"
+    fi
+  else
+    tar -C "$INSTALL_DIRECTORY" -zxf "$DOWNLOAD_FILE" turso
+    if [ -z "${TURSO_INSTALL_ZIP:-}" ]; then
+      rm -f "$DOWNLOAD_FILE"
+    fi
+  fi
 }
 
 install_libsql_server() {
+    if [ "$OS" = "Windows" ]; then
+        printf "${bright_blue}Skipping libsql-server${reset}: no native Windows build is published yet.\n"
+        printf "The Turso Cloud CLI itself is installed natively; use Turso Cloud or a remote sqld.\n"
+        return 0
+    fi
+
     case $ARCH in
         x86_64) ARCH_TARGET="x86_64" ;;
         aarch64) ARCH_TARGET="aarch64" ;;
@@ -178,7 +219,7 @@ main() {
   probe_arch
   probe_os
 
-  INSTALL_DIRECTORY="$HOME/.turso"
+  INSTALL_DIRECTORY="${TURSO_INSTALL_DIR:-$HOME/.turso}"
   install_libsql_server
   install_turso_cli
   update_profile
